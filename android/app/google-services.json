@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "624770682842",
+    "firebase_url": "https://flutterlaravel-e1b1c-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "flutterlaravel-e1b1c",
+    "storage_bucket": "flutterlaravel-e1b1c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:624770682842:android:b05568b9990b5be1a83ae3",
+        "android_client_info": {
+          "package_name": "com.ganangpriyambodo.stepdash"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "624770682842-v0qucsct4e1dit72ons5k1heu5n196ip.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7ai-2BzoA2wTA8fz4r-ADpMBtobZpp4w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "624770682842-v0qucsct4e1dit72ons5k1heu5n196ip.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "624770682842-mipjs8jodd3r6jcgd41lk8ims93kpbtj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ganangpriyambodo.stepmotor"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:624770682842:android:ad59e50c038be1d1a83ae3",
+        "android_client_info": {
+          "package_name": "com.ganangpriyambodo.stepmotor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "624770682842-v0qucsct4e1dit72ons5k1heu5n196ip.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7ai-2BzoA2wTA8fz4r-ADpMBtobZpp4w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "624770682842-v0qucsct4e1dit72ons5k1heu5n196ip.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "624770682842-mipjs8jodd3r6jcgd41lk8ims93kpbtj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ganangpriyambodo.stepmotor"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
