@@ -1,5 +1,3 @@
-
-
 import 'package:get/get.dart';
 
 import 'dart:async';
@@ -10,20 +8,40 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-class PaymentView extends StatefulWidget {
-  const PaymentView({Key? key}) : super(key: key);
+import '../controllers/paymentbengkel_controller.dart';
+
+// class PaymentbengkelView extends GetView<PaymentbengkelController> {
+//   const PaymentbengkelView({Key? key}) : super(key: key);
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('PaymentbengkelView'),
+//         centerTitle: true,
+//       ),
+//       body: const Center(
+//         child: Text(
+//           'PaymentbengkelView is working',
+//           style: TextStyle(fontSize: 20),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+class PaymentbengkelView extends StatefulWidget {
+  const PaymentbengkelView({super.key});
+
   @override
-  State<PaymentView> createState() => PaymentViewState();
+  State<PaymentbengkelView> createState() => _PaymentbengkelViewState();
 }
 
-class PaymentViewState extends State<PaymentView> {
+class _PaymentbengkelViewState extends State<PaymentbengkelView> {
   var loadingPercentage = 0;
 
   @override
   Widget build(BuildContext context) {
     final url = Get.arguments['url'];
-    Map<String, dynamic> data = Get.arguments;
-    print('INI WEBVIEW: $url');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Payment'),
@@ -52,7 +70,7 @@ class PaymentViewState extends State<PaymentView> {
                     loadingPercentage = 100;
                     print(url);
                     if (url.contains("transaction_status=settlement")) {
-                      Get.offAllNamed(Routes.TRACKING, arguments: data);
+                      Get.offAllNamed(Routes.HOME);
                       EasyLoading.show(
                           status:
                               'Pembayaran Berhasil, Sedang Mencari Driver...');
@@ -86,7 +104,6 @@ class PaymentViewState extends State<PaymentView> {
       ),
     );
   }
-
   Future<void> _launchInExternalBrowser(Uri url) async {
     if (!await launchUrl(
       url,

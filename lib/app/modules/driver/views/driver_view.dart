@@ -9,9 +9,14 @@ import 'package:get/get.dart';
 import 'package:stepmotor/app/data/login_provider.dart';
 import 'package:stepmotor/app/data/places_api_provider.dart';
 import 'package:stepmotor/app/data/user_provider.dart';
+import 'package:stepmotor/app/modules/History/views/history_view.dart';
 import 'package:stepmotor/app/modules/driver/controllers/driver_controller.dart';
 import 'package:stepmotor/app/modules/login/controllers/login_controller.dart';
 import 'package:stepmotor/app/modules/ride/directions_model.dart';
+import 'package:stepmotor/app/modules/user/controllers/user_controller.dart';
+import 'package:stepmotor/app/modules/user/views/user_view.dart';
+import 'package:stepmotor/app/routes/app_pages.dart';
+import 'package:stepmotor/failure.dart';
 import 'package:stepmotor/theme.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -20,6 +25,7 @@ import 'package:sp_util/sp_util.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_swipe_button/flutter_swipe_button.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:http/http.dart' as serviceHttp;
 
 class DriverView extends StatefulWidget {
   const DriverView({super.key});
@@ -333,70 +339,100 @@ class _DriverViewState extends State<DriverView> {
     }
   }
 
-  void routeDone() async {}
-  void acceptRequest(int requestId) async {
+  Future<void> createOrder(data, int requestId) async {
     // Tampilkan indikator loading
     EasyLoading.show(status: 'Tunggu Sebentar...');
 
     // Mendapatkan referensi ke node di Firebase Realtime Database
     DatabaseReference ref =
         FirebaseDatabase.instance.ref("requestOrders/$requestId");
-
     try {
-      // Menyiapkan data order baru
-      var data = {
-        "id_layanan": getRequest[0]['service_name'],
-        "user_id": getRequest[0]['user']['id'],
-        "pickup": getRequest[0]['pickupLoc'],
-        "dropoff": getRequest[0]['destinationLoc'],
-        "status": 'on_the_way',
-        'harga': getRequest[0]['destinationLoc']
-      };
+      var response = await serviceHttp.post(
+        Uri.parse("http://10.0.2.2:8000/api/create_order"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          "Authorization": 'Bearer ${SpUtil.getString('token')}',
+        },
+        body: data,
+      );
+      print(response.body);
+      if (response.statusCode == 200) {
+        var jsonResponse = json.decode(response.body);
+        await ref.update({
+          'status': 'accepted',
+        });
+        setState(() {
+          orderIDAPI = jsonResponse['id'];
+        });
+        var locDriver =
+            LatLng(_driverLocation!.latitude, _driverLocation!.longitude);
+        var pickUpLoc = LatLng(getRequest[0]['pickup']['latitude'],
+            getRequest[0]['pickup']['longitude']);
+        print("LOC DRIVER $locDriver");
 
-      // Membuat order baru menggunakan UserProvider dan menangani hasil dengan then
-      await UserProvider().createOrder(data).then((response) async {
-        if (response.isOk) {
-          // Jika order berhasil dibuat, perbarui status permintaan di Firebase
-          await ref.update({
-            'status': 'accepted',
-            'busy': true,
-          });
-          setState(() {
-            orderIDAPI = response.body['id_order'];
-          });
-          // Menambahkan marker untuk lokasi pengemudi dan titik jemput
-          var locDriver =
-              LatLng(_driverLocation!.latitude, _driverLocation!.longitude);
-          var pickUpLoc = LatLng(getRequest[0]['pickup']['latitude'],
-              getRequest[0]['pickup']['longitude']);
-          print("LOC DRIVER $locDriver");
+        _addMarker('pickup_marker', locDriver, sourceMarkerIcon);
+        _addMarker('driver_marker', pickUpLoc, destinationMarkerIcon);
 
-          _addMarker('pickup_marker', locDriver, sourceMarkerIcon);
-          _addMarker('driver_marker', pickUpLoc, destinationMarkerIcon);
+        // Mendapatkan polyline untuk rute
+        getPolyLinePoint(origin: locDriver, destination: pickUpLoc);
 
-          // Mendapatkan polyline untuk rute
-          getPolyLinePoint(origin: locDriver, destination: pickUpLoc);
+        // Mengubah status permintaan menjadi diterima
+        isStatusAccepted.value = true;
+        print('Request has been accepted.');
 
-          // Mengubah status permintaan menjadi diterima
-          isStatusAccepted.value = true;
-          print('Request has been accepted.');
-
-          // Sembunyikan indikator loading
-          EasyLoading.dismiss();
-        } else {
-          // Jika respons tidak berhasil, tampilkan error
-          print('Failed to create order: ${response.statusCode}');
-          EasyLoading.showError('Failed to create order.');
-          EasyLoading.dismiss();
-        }
-      }).catchError((error) {
-        // Menangani kesalahan saat mencoba membuat order
-        print('Error creating order: $error');
+        // Sembunyikan indikator loading
+        EasyLoading.dismiss();
+      } else {
+        print(
+            'Failed to create order: ${response.statusCode} + ${response.body}');
         EasyLoading.showError('Failed to create order.');
         EasyLoading.dismiss();
-      });
+      }
     } catch (e) {
-      // Menangani error jika terjadi kesalahan saat mengupdate data
+      print('Failed to update request status: $e');
+      EasyLoading.showError('Failed to update request status.');
+      EasyLoading.dismiss();
+    }
+  }
+
+  Future<void> routeDone(int requestId) async {
+    // Tampilkan indikator loading
+    EasyLoading.show(status: 'Tunggu Sebentar...');
+
+    // Mendapatkan referensi ke node di Firebase Realtime Database
+    DatabaseReference orderRef =
+        FirebaseDatabase.instance.ref("requestOrders/$requestId");
+    DatabaseReference driverRef =
+        FirebaseDatabase.instance.ref("drivers/${driverDetail!['id']}");
+
+    try {
+      var data = jsonEncode({
+        'order_id': orderIDAPI,
+        'total': getRequest[0]['harga'],
+      });
+      var response = await serviceHttp.post(
+        Uri.parse("http://10.0.2.2:8000/api/create_order"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          "Authorization": 'Bearer ${SpUtil.getString('token')}',
+        },
+        body: data,
+      );
+
+      if (response.statusCode == 200) {
+        // var jsonResponse = json.decode(response.body);
+        // await orderRef.update({
+        //   'status': 'completed',
+        // });
+        // await driverRef.update({
+        //   'busy': false,
+        // });
+        EasyLoading.dismiss();
+      } else {
+        EasyLoading.showError('Failed to create order.');
+        EasyLoading.dismiss();
+      }
+    } catch (e) {
       print('Failed to update request status: $e');
       EasyLoading.showError('Failed to update request status.');
       EasyLoading.dismiss();
@@ -432,58 +468,66 @@ class _DriverViewState extends State<DriverView> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
+              // Header
               Container(
-                  height: 200,
-                  color: green2,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const CircleAvatar(
-                        radius: 30,
+                height: 220,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [green2, Colors.green],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white,
+                      child: CircleAvatar(
+                        radius: 36,
                         backgroundImage: NetworkImage(
                             'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        controller.driverDetail.value['nama'],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      controller.driverDetail.value['nama'] ?? 'Nama Pengguna',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${controller.driverDetail.value['email']}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      controller.driverDetail.value['email'] ??
+                          'email@example.com',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
                       ),
-                    ],
-                  )),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Body
+              const Divider(),
               ListTile(
+                leading: Icon(Icons.history, color: green2),
                 title: const Text('History Perjalanan'),
                 onTap: () {
                   // Tindakan ketika item 1 di-tap
+                  Get.to(() => HistoryView());
                 },
               ),
               ListTile(
-                title: const Text('Dompet'),
-                onTap: () {
-                  // Tindakan ketika item 1 di-tap
-                },
-              ),
-              ListTile(
+                leading: Icon(Icons.person, color: green2),
                 title: const Text('Profile'),
                 onTap: () {
-                  // Tindakan ketika item 2 di-tap
-                },
-              ),
-              ListTile(
-                title: const Text('Logout'),
-                onTap: () {
-                  // Tindakan ketika item 2 di-tap
-                  LoginController().logout(SpUtil.getString('token')!);
+                  Get.lazyPut(() => UserController());
+                  Get.to(() => const UserView());
                 },
               ),
             ],
@@ -713,7 +757,9 @@ class _DriverViewState extends State<DriverView> {
                                     ),
                                     activeThumbColor: green1,
                                     activeTrackColor: Colors.grey.shade300,
-                                    onSwipe: routeDone,
+                                    onSwipe: () async {
+                                      await routeDone(ordersId);
+                                    },
                                     child: const Text(
                                       "Selesaikan Perjalanan",
                                     ),
@@ -907,8 +953,16 @@ class _DriverViewState extends State<DriverView> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    acceptRequest(ordersId);
+                  onPressed: () async {
+                    var data = jsonEncode({
+                      "id_layanan": requestData[0]['service_name'],
+                      "id_user": requestData[0]['user']['id'],
+                      "pickup": requestData[0]['pickupLoc'],
+                      "dropoff": requestData[0]['destinationLoc'],
+                      "status": 'on_the_way',
+                    });
+                    print("DATA ORDER PERPARE : $data");
+                    await createOrder(data, ordersId);
                     Navigator.of(context).pop(); // Tutup modal
                     // Tambahkan logika untuk menerima order di sini
                   },
@@ -1007,41 +1061,3 @@ class BtnFrave extends StatelessWidget {
     );
   }
 }
-
-
-// OTW JEMPU PENUMPANG
-
-
-
-// IDle
-// Container(
-//               padding: const EdgeInsets.all(15.0),
-//               height: 60,
-//               width: MediaQuery.of(context).size.width,
-//               decoration: BoxDecoration(
-//                   color: Colors.white,
-//                   borderRadius: BorderRadius.circular(15.0),
-//                   boxShadow: [
-//                     BoxShadow(
-//                         color: Colors.grey.withOpacity(.5),
-//                         blurRadius: 7,
-//                         spreadRadius: 5)
-//                   ]),
-//               child: const Column(
-//                 children: [
-//                   Row(
-//                     children: [
-//                       Column(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         children: [
-//                           TextCustom(
-//                               text: "Sedang Mencari Penumpang...",
-//                               fontSize: 20,
-//                               maxLine: 2),
-//                         ],
-//                       )
-//                     ],
-//                   ),
-//                 ],
-//               ),
-//             ),

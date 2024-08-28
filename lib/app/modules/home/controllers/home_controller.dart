@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:stepmotor/app/data/user_provider.dart';
+import 'package:stepmotor/components/bengkel_card.dart';
 import 'package:stepmotor/components/step_motor.dart';
 import 'package:sp_util/sp_util.dart';
 import 'package:stepmotor/components/home_screen.dart';
@@ -14,7 +16,7 @@ class HomeController extends GetxController {
   var selectedIndex = 0.obs;
   var selectedIndexService = 0.obs;
   // var userDetailString = {}.obs;
-
+  var listBengkelDropoff = <Bengkel>[].obs; // Ubah menjadi list of Bengkel
   final FocusNode startLocationFocusNode = FocusNode();
   final FocusNode endLocationFocusNode = FocusNode();
   final startLocationName = TextEditingController();
@@ -54,6 +56,8 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     userDetail = SpUtil.getObject('userDetail') as Map<String, dynamic>?;
+    getBengkels();
+    print("listBengkelDropoff: $listBengkelDropoff");
   }
 
   @override
@@ -68,5 +72,37 @@ class HomeController extends GetxController {
 
   void updateUserDetails() {
     userDetail = SpUtil.getObject('userDetail') as Map<String, dynamic>;
+  }
+
+  void getBengkels() async {
+    bool isDone = false;
+    while (!isDone) {
+      try {
+        final response = await UserProvider().getBengkels();
+
+        if (response.statusCode == 200) {
+          // Pastikan respons berupa List dan setiap elemen adalah Map
+          if (response.body != null && response.body is List) {
+            // Parsing data menjadi List<Bengkel>
+            List<dynamic> data = response.body;
+            listBengkelDropoff.value =
+                data.map((e) => Bengkel.fromMap(e)).toList();
+            isDone = true;
+            print('Parsed Bengkels: ${listBengkelDropoff.length}');
+            print(
+                'Bengkels: ${listBengkelDropoff.map((bengkel) => bengkel.nama)}');
+          } else {
+            isDone = false;
+            print('Unexpected data format: ${response.body}');
+          }
+        } else {
+          await Future.delayed(
+              const Duration(seconds: 1)); // Jeda selama 2 detik
+          print('Error: ${response.statusCode} - ${response.body}');
+        }
+      } catch (e) {
+        print('Exception: $e');
+      }
+    }
   }
 }

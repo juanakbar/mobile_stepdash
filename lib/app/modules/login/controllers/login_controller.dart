@@ -55,64 +55,56 @@ class LoginController extends GetxController {
   }
 
   void login() async {
-    if (formKey.currentState?.validate() ?? false) {
-      isLoading.value = true;
-      EasyLoading.show(status: 'Tunggu Sebentar...');
-      final EMAIL = TextEditingControllers['email']?.text;
-      final PASSWORD = TextEditingControllers['password']?.text;
+    EasyLoading.show(status: 'Tunggu Sebentar...');
+    final EMAIL = TextEditingControllers['email']?.text;
+    final PASSWORD = TextEditingControllers['password']?.text;
 
-      final data = {
-        'email': EMAIL,
-        'password': PASSWORD,
-      };
+    final data = {
+      'email': EMAIL,
+      'password': PASSWORD,
+    };
 
-      LoginProvider().attempt(data).then((value) {
-        if (value.statusCode == 200) {
-          // Dekode value.body menjadi Map<String, dynamic>
-          // Map<String, dynamic> parsedJson = jsonDecode(value.body);
-
-          // Simpan data user dan token menggunakan SpUtil
-          SpUtil.putObject('userDetail', value.body['user']);
-          SpUtil.putString('token', value.body['token']);
-          SpUtil.putString('role', value.body['user']['roles'][0]['name']);
-          SpUtil.putBool('isLogin', true);
-          // Menghilangkan loading
-          EasyLoading.dismiss();
-
-          // Menampilkan snackbar dengan nama pengguna
-          Get.snackbar(
-            'Berhasil',
-            'Selamat Datang Kembali ${value.body['user']['nama']}', // Menggunakan parsedJson untuk mengambil data nama
-          );
-
-          // Update status loading
-          isLoading.value = false;
-          printInfo(
-              info: 'User Role: ${value.body['user']['roles'][0]['name']}');
-          // Pindah ke halaman HOME
-          if (value.body['user']['roles'][0]['name'] == 'Driver') {
-            Get.offAllNamed(Routes.DRIVER);
-          } else {
-            Get.offAllNamed(Routes.HOME);
-          }
-          // Get.offAllNamed(Routes.HOME);
-        } else {
-          // Menghilangkan loading jika terjadi error
-          EasyLoading.dismiss();
-
-          // Menampilkan pesan kesalahan
-          Get.snackbar('Error', 'Email atau Password Salah');
-
-          // Update status loading
-          isLoading.value = false;
-        }
-      }).catchError((error) {
-        // Tangani error lain yang mungkin terjadi
+    LoginProvider().attempt(data).then((value) {
+      print("valueLOGIN: ${value.body}");
+      if (value.statusCode == 200) {
+        // Dekode value.body menjadi Map<String, dynamic>
+        // Map<String, dynamic> parsedJson = jsonDecode(value.body);
+        // Simpan data user dan token menggunakan SpUtil
+        SpUtil.putObject('userDetail', value.body['user']);
+        SpUtil.putString('token', value.body['token']);
+        SpUtil.putString('role', value.body['user']['roles'][0]['name']);
+        SpUtil.putBool('isLogin', true);
+        // Menghilangkan loading
         EasyLoading.dismiss();
-        Get.snackbar('Error', 'Terjadi kesalahan: $error');
+
+        // Menampilkan snackbar dengan nama pengguna
+        Get.snackbar(
+          'Berhasil',
+          'Selamat Datang Kembali ${value.body['user']['nama']}', // Menggunakan parsedJson untuk mengambil data nama
+        );
+
+        // Update status loading
         isLoading.value = false;
-      });
-    }
+        printInfo(info: 'User Role: ${value.body['user']['roles'][0]['name']}');
+        // Pindah ke halaman HOME
+        if (value.body['user']['roles'][0]['name'] == 'Driver') {
+          Get.offAllNamed(Routes.DRIVER);
+        } else {
+          Get.offAllNamed(Routes.HOME);
+        }
+        // Get.offAllNamed(Routes.HOME);
+      } else {
+        // Menghilangkan loading jika terjadi error
+        EasyLoading.dismiss();
+
+        // Menampilkan pesan kesalahan
+        Get.snackbar('Error', 'Email atau Password Salah');
+      }
+    }).catchError((error) {
+      // Tangani error lain yang mungkin terjadi
+      EasyLoading.dismiss();
+      Get.snackbar('Error', 'Terjadi kesalahan: $error');
+    });
   }
 
   void increment() => count.value++;

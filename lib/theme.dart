@@ -125,3 +125,58 @@ class ColorsCustom {
   static const Color secundaryColor = Color(0xff5B6589);
   static const Color backgroundColor = Color(0xffF5F5F5);
 }
+
+const Color blueButton = Color(0xFF5468FF);
+const Color blueText = Color(0xFF4D60E7);
+
+const Color grayText = Color(0xFF5D5F65);
+const Color whiteText = Color(0xFFEDEEEF);
+
+const Color white = Color(0xFFFFFFFF);
+const Color black = Color(0xFF000000);
+
+const Color blackBG = Color(0xFF181A20);
+const Color blackTextFild = Color(0xFF262A34);
+
+const List<Color> gradient = [
+  Color.fromRGBO(24, 26, 32, 1),
+  Color.fromRGBO(24, 26, 32, 0.9),
+  Color.fromRGBO(24, 26, 32, 0.8),
+  Color.fromRGBO(24, 26, 32, 0.7),
+  Color.fromRGBO(24, 26, 32, 0.6),
+  Color.fromRGBO(24, 26, 32, 0.5),
+  Color.fromRGBO(24, 26, 32, 0.4),
+  Color.fromRGBO(24, 26, 32, 0.0),
+];
+const TextStyle headline = TextStyle(
+  fontSize: 28,
+  color: whiteText,
+  fontWeight: FontWeight.bold,
+);
+
+const TextStyle headlineDot = TextStyle(
+  fontSize: 30,
+  color: blueText,
+  fontWeight: FontWeight.bold,
+);
+const TextStyle headline1 = TextStyle(
+  fontSize: 24,
+  color: whiteText,
+  fontWeight: FontWeight.bold,
+);
+
+const TextStyle headline2 = TextStyle(
+  fontSize: 14,
+  color: whiteText,
+  fontWeight: FontWeight.w600,
+);
+const TextStyle headline3 = TextStyle(
+  fontSize: 14,
+  color: grayText,
+  fontWeight: FontWeight.bold,
+);
+const TextStyle hintStyle = TextStyle(
+  fontSize: 14,
+  color: grayText,
+  fontWeight: FontWeight.bold,
+);

@@ -6,9 +6,10 @@ class DirectionsProvider extends GetConnect {
   @override
   void onInit() {
     httpClient.defaultDecoder = (map) {
-      if (map is Map<String, dynamic>) return Directions.fromJson(map);
-      if (map is List)
-        return map.map((item) => Directions.fromJson(item)).toList();
+      if (map is Map<String, dynamic>) return Directions.fromMap(map);
+      if (map is List) {
+        return map.map((item) => Directions.fromMap(item)).toList();
+      }
     };
     httpClient.baseUrl = 'YOUR-API-URL';
   }

@@ -12,14 +12,17 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  String? role = SpUtil.getString('role', defValue: 'Customer');
   runApp(
     GetMaterialApp(
       title: "StepDash",
-      initialRoute: (SpUtil.getBool('isLogin', defValue: false)!
-          ? SpUtil.getString('role', defValue: 'Customer') == 'Driver'
+      initialRoute: (SpUtil.getBool('isLogin', defValue: false) ?? false)
+          ? (role == 'Driver'
               ? Routes.DRIVER
-              : Routes.HOME
-          : Routes.LOGIN),
+              : role == 'Mekanik'
+                  ? Routes.MEKANIK
+                  : Routes.HOME)
+          : Routes.SPLASH,
       getPages: AppPages.routes,
       builder: EasyLoading.init(),
     ),

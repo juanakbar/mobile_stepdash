@@ -11,6 +11,13 @@ abstract class Routes {
   static const DRIVER = _Paths.DRIVER;
   static const PAYMENT = _Paths.PAYMENT;
   static const TRACKING = _Paths.TRACKING;
+  static const HISTORY = _Paths.HISTORY;
+  static const SPLASH = _Paths.SPLASH;
+  static const REGISTER = _Paths.REGISTER;
+  static const BENGKEL = _Paths.BENGKEL;
+  static const MEKANIK = _Paths.MEKANIK;
+  static const TRACKINGBENGKEL = _Paths.TRACKINGBENGKEL;
+  static const PAYMENTBENGKEL = _Paths.PAYMENTBENGKEL;
 }
 
 abstract class _Paths {
@@ -23,4 +30,11 @@ abstract class _Paths {
   static const DRIVER = '/driver';
   static const PAYMENT = '/payment';
   static const TRACKING = '/tracking';
+  static const HISTORY = '/history';
+  static const SPLASH = '/splash';
+  static const REGISTER = '/register';
+  static const BENGKEL = '/bengkel';
+  static const MEKANIK = '/mekanik';
+  static const TRACKINGBENGKEL = '/trackingbengkel';
+  static const PAYMENTBENGKEL = '/paymentbengkel';
 }

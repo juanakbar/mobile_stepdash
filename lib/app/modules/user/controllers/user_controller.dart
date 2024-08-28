@@ -59,6 +59,7 @@ class UserController extends GetxController {
   void getMyProfile() async {
     EasyLoading.show(status: 'Tunggu Sebentar...');
     await UserProvider().getMyProfile().then((value) {
+      print(value.body);
       if (value.statusCode == 200) {
         var myProfile = value.body['user'];
         namaController.text = myProfile['nama'].toString();
@@ -80,11 +81,12 @@ class UserController extends GetxController {
     final username = usernameController.text;
     final data = {
       'nama': nama,
-      'telepon': telepon,
+      'telepon': int.parse(telepon),
       'alamat': alamat,
       'username': username,
     };
     await UserProvider().updateProfile(data).then((value) async {
+      print("USER UPDATE: $data");
       if (value.statusCode == 200) {
         // Simpan data terbaru ke SpUtil
         await SpUtil.putObject('userDetail', value.body['user']);

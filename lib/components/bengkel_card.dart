@@ -2,49 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:stepmotor/theme.dart';
 
 class Bengkel {
-  final String namabengkel;
-  final double distance;
+  final String nama;
+  final String alamat;
 
-  Bengkel({
-    required this.namabengkel,
-    required this.distance,
+  Bengkel( {
+    required this.nama,
+    required this.alamat,
   });
 
   factory Bengkel.fromMap(Map<String, dynamic> map) {
     return Bengkel(
-      namabengkel: map['namabengkel'],
-      distance: map['distance'],
+      nama: map['nama'],
+      alamat: map['alamat'],
+      
     );
   }
-
-  // Static data
-  static List<Bengkel> get staticBengkels => [
-        Bengkel(
-          namabengkel: 'Yamaha Just Great Cibeureum',
-          distance: 15000,
-        ),
-        Bengkel(
-          namabengkel: 'Yamaha Cimahi Motor Official',
-          distance: 25000,
-        ),
-        Bengkel(
-          namabengkel: 'Yamaha Metro Cimahi Motor',
-          distance: 30000,
-        ),
-      ];
 }
 
 class BengkelCard extends StatelessWidget {
   final Bengkel bengkel;
-
-  const BengkelCard({super.key, required this.bengkel});
+  final onTap;
+  const BengkelCard({super.key, required this.bengkel, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: GestureDetector(
-        onTap: () {},
+        onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
@@ -62,7 +47,7 @@ class BengkelCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    bengkel.namabengkel,
+                    bengkel.nama,
                     style: const TextStyle(
                         color: Color.fromARGB(255, 0, 0, 0),
                         fontSize: 16,
@@ -82,7 +67,7 @@ class BengkelCard extends StatelessWidget {
                         width: 5,
                       ),
                       Text(
-                        '> ${bengkel.distance} km',
+                        '> ${bengkel.alamat}',
                         style: const TextStyle(
                             color: Color.fromARGB(255, 0, 0, 0), fontSize: 14),
                       ),

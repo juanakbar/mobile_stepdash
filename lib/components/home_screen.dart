@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:stepmotor/app/modules/bengkel/views/bengkel_view.dart';
 import 'package:stepmotor/app/modules/home/controllers/home_controller.dart';
 import 'package:stepmotor/app/modules/ride/views/ride_view.dart';
+import 'package:stepmotor/app/routes/app_pages.dart';
 import 'package:stepmotor/components/bengkel_card.dart';
 
 class HomeScreen extends GetView<HomeController> {
@@ -9,7 +13,7 @@ class HomeScreen extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    List<Bengkel> bengkel = Bengkel.staticBengkels;
+    print(controller.listBengkelDropoff);
     return Column(
       children: [
         const SizedBox(
@@ -127,23 +131,37 @@ class HomeScreen extends GetView<HomeController> {
             ],
           ),
         ),
-        const SizedBox(
-          height: 10,
-        ),
-        BengkelCard(
-          bengkel: bengkel[0],
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        BengkelCard(
-          bengkel: bengkel[1],
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        BengkelCard(
-          bengkel: bengkel[2],
+        Expanded(
+          child: Obx(() {
+            if (controller.listBengkelDropoff.isEmpty) {
+              return Center(child: CircularProgressIndicator());
+            } else {
+              return ListView.builder(
+                itemCount: controller.listBengkelDropoff.length,
+                itemBuilder: (context, index) {
+                  var bengkel = controller.listBengkelDropoff[index];
+                  print(bengkel.alamat);
+                  return Column(
+                    children: [
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      BengkelCard(
+                          onTap: () {
+                            var data = {
+                              'name': bengkel.nama,
+                              'address': bengkel.alamat,
+                            };
+                            Get.to(() => BengkelView(), arguments: data);
+                          },
+                          bengkel:
+                              bengkel), // Pass object Bengkel ke BengkelCard
+                    ],
+                  );
+                },
+              );
+            }
+          }),
         ),
       ],
     );
