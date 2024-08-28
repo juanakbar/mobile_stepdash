@@ -566,8 +566,8 @@ class _RideViewState extends State<RideView> {
                                 "status": 'pending',
                                 'harga': harga.value
                               };
-                              Get.offAllNamed(Routes.TRACKING, arguments: data);
-                              // Get.offAllNamed(Routes.PAYMENT, arguments: data);
+                              // Get.offAllNamed(Routes.TRACKING, arguments: data);
+                              Get.offAllNamed(Routes.PAYMENT, arguments: data);
                               EasyLoading.dismiss();
                               createOrder();
                             }
