@@ -156,16 +156,16 @@ class _TrackingbengkelViewState extends State<TrackingbengkelView> {
               ],
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                const Icon(Icons.person, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                const Text("Mekanik"),
-                const SizedBox(width: 8),
-                Text(getMekanik.isNotEmpty ? getMekanik[0]['nama_mekanik'] : "",
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-              ],
-            ),
+            Obx(() => Row(
+                  children: [
+                    const Icon(Icons.person, size: 16, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    const Text("Mekanik"),
+                    const SizedBox(width: 8),
+                    Text(getMekanik.isNotEmpty ? getMekanik[0]['nama'] : "",
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                )),
             const SizedBox(height: 16),
             // Live Tracking Button
             Obx(() {
@@ -192,7 +192,7 @@ class _TrackingbengkelViewState extends State<TrackingbengkelView> {
                         var data = {
                           "url": token,
                         };
-                        Get.toNamed(Routes.PAYMENT, arguments: data);
+                        Get.offAllNamed(Routes.PAYMENTBENGKEL, arguments: data);
                         EasyLoading.dismiss();
                       }
                     },

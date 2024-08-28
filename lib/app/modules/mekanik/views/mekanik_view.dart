@@ -201,18 +201,21 @@ class _MekanikViewState extends State<MekanikView> {
         body: jsonEncode({"order_id": orderIDAPI, "total": harga.text}),
       );
       if (response.statusCode == 200) {
+        var data = jsonEncode({"id": orderIDAPI, "status": "completed"});
         final responseUpdate = await serviceHttp.put(
           Uri.parse("http://10.0.2.2:8000/api/update_status_order"),
           headers: <String, String>{
             'Content-Type': 'application/json',
             "Authorization": 'Bearer ${SpUtil.getString('token')}',
+            'Accept': 'application/json',
           },
-          body: jsonEncode({"id": orderIDAPI, "status": "completed"}),
+          body: data,
         );
-        if (response.statusCode == 200) {
+        print("PAYLOAD $data");
+        if (responseUpdate.statusCode == 200) {
           await ref.update({
             'status': 'completed',
-            'harga': harga.text,
+            'harga': int.parse(harga.text),
           });
           setState(() {
             isModalShown = false;
@@ -228,8 +231,8 @@ class _MekanikViewState extends State<MekanikView> {
           Get.snackbar('Success', 'Pekerjaan Selesai');
         } else {
           print(
-              'Failed to create order: ${response.statusCode} + ${response.body}');
-          EasyLoading.showError('Failed to create order.');
+              'Failed to create order: ${responseUpdate.statusCode} + ${responseUpdate.body}');
+          EasyLoading.showError('Failed to Update order.');
           EasyLoading.dismiss();
         }
       } else {
@@ -290,13 +293,20 @@ class _MekanikViewState extends State<MekanikView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.white,
-                      child: CircleAvatar(
-                        radius: 36,
-                        backgroundImage: NetworkImage(
-                            'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'),
+                    Container(
+                      height: 45,
+                      width: 45,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: SvgPicture.network(
+                          controller.mekanikDetail.value['avatar'],
+                          fit:
+                              BoxFit.cover, // To ensure the SVG scales properly
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),

@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stepmotor/app/data/user_provider.dart';
+import 'package:stepmotor/app/modules/History/views/history_view.dart';
 import 'package:stepmotor/components/bengkel_card.dart';
+import 'package:stepmotor/components/history_user.dart';
 import 'package:stepmotor/components/step_motor.dart';
 import 'package:sp_util/sp_util.dart';
 import 'package:stepmotor/components/home_screen.dart';
@@ -30,10 +32,7 @@ class HomeController extends GetxController {
   // List of widgets corresponding to different tabs or sections
   static List<Widget> widgetOptions = <Widget>[
     HomeScreen(),
-    const Text(
-      'History',
-      style: optionStyle,
-    )
+    HistoryUserView(),
   ];
   static List<Widget> widgetOptionsService = <Widget>[
     const StepMotor(),

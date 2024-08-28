@@ -71,9 +71,7 @@ class _PaymentbengkelViewState extends State<PaymentbengkelView> {
                     print(url);
                     if (url.contains("transaction_status=settlement")) {
                       Get.offAllNamed(Routes.HOME);
-                      EasyLoading.show(
-                          status:
-                              'Pembayaran Berhasil, Sedang Mencari Driver...');
+                      Get.snackbar("Berhasil", 'Pembayaran Berhasil');
                     }
                   });
                 },
@@ -104,6 +102,7 @@ class _PaymentbengkelViewState extends State<PaymentbengkelView> {
       ),
     );
   }
+
   Future<void> _launchInExternalBrowser(Uri url) async {
     if (!await launchUrl(
       url,

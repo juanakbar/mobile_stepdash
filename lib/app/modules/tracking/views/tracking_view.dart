@@ -9,9 +9,10 @@ import 'package:get/get.dart';
 import 'package:stepmotor/app/data/places_api_provider.dart';
 import 'package:stepmotor/app/modules/driver/views/driver_view.dart';
 import 'package:stepmotor/app/modules/ride/directions_model.dart';
+import 'package:stepmotor/app/routes/app_pages.dart';
 import 'package:stepmotor/driver_service.dart';
 import 'package:stepmotor/theme.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 import '../controllers/tracking_controller.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -28,6 +29,7 @@ class TrackingView extends StatefulWidget {
 }
 
 class _TrackingViewState extends State<TrackingView> {
+  RxBool isDone = false.obs;
   final TrackingController rideController = Get.put(TrackingController());
   final Completer<GoogleMapController> _controllerGoogleMap =
       Completer<GoogleMapController>();
@@ -102,6 +104,7 @@ class _TrackingViewState extends State<TrackingView> {
         addCustomDriverSource();
       }
     });
+    cekStatus();
 
     // _listenToDriverLocation();
   }
@@ -206,6 +209,35 @@ class _TrackingViewState extends State<TrackingView> {
       EasyLoading.dismiss();
       print("Error: $e");
     }
+  }
+
+  void cekStatus() async {
+    DatabaseReference ref =
+        FirebaseDatabase.instance.ref("requestOrders/${userDetail!['id']}");
+    while (!isDone.value) {
+      print('JALAN TERUS');
+      try {
+        DatabaseEvent _ordersRef = await ref.once();
+        Map<dynamic, dynamic>? orders =
+            _ordersRef.snapshot.value as Map<dynamic, dynamic>?;
+        if (orders != null) {
+          if (orders['status'] == 'completed') {
+            print('orders : ${orders['harga']}');
+            setState(() {
+              // harga.value = int.parse(orders['harga']);
+              isDone.value = true;
+              Get.snackbar("Yeay", "Perjalanan Kamu Sudah Sampai");
+              Get.offAllNamed(Routes.HOME);
+            });
+          }
+        }
+      } catch (e) {
+        print('Failed to update data: $e');
+      }
+    }
+    await Future.delayed(
+      const Duration(seconds: 1),
+    ); // Menunggu 2 detik sebelum mengulang
   }
 
   Future<void> _cameraToPosition(LatLng pos) async {
@@ -520,8 +552,8 @@ class _TrackingViewState extends State<TrackingView> {
                                         : Container(), // Placeholder jika driverDetail kosong
                                     const Spacer(),
                                     InkWell(
-                                      // onTap: () async => await urlLauncherFrave
-                                      //     .makePhoneCall('tel:${driverDetail[0]['telepon']}'),
+                                      onTap: () async => await makePhoneCall(
+                                          'tel:${driverDetail[0]['telepon']}'),
                                       child: Container(
                                         height: 45,
                                         width: 45,
@@ -545,5 +577,13 @@ class _TrackingViewState extends State<TrackingView> {
         ],
       ),
     );
+  }
+
+  Future<void> makePhoneCall(String url) async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }

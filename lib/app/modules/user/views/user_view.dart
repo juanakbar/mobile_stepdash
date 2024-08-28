@@ -156,12 +156,7 @@ class UserView extends GetView<UserController> {
               colorIcon: 0xff01C58C,
               onPressed: () => {controller.getMyProfile()},
             ),
-            ItemAccount(
-              text: 'Change Password',
-              icon: Icons.lock_rounded,
-              colorIcon: 0xff1B83F5,
-              onPressed: () => {},
-            ),
+
             ItemAccount(
               text: 'Logout',
               icon: Icons.logout,

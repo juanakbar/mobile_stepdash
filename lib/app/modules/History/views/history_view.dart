@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:stepmotor/app/modules/History/controllers/history_controller.dart';
 
-import '../controllers/history_controller.dart';
+import 'package:sp_util/sp_util.dart';
 
 class HistoryView extends StatefulWidget {
   @override
@@ -12,7 +13,7 @@ class HistoryView extends StatefulWidget {
 class _HistoryViewState extends State<HistoryView> {
   bool isFootstepSelected = true;
   HistoryController historyController = Get.put(HistoryController());
-
+  String? role = SpUtil.getString('role', defValue: 'Customer');
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,45 +29,47 @@ class _HistoryViewState extends State<HistoryView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      isFootstepSelected = true;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        isFootstepSelected ? Colors.red : Colors.grey.shade300,
-                    foregroundColor:
-                        isFootstepSelected ? Colors.white : Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 15),
-                  ),
-                  child: const Text('Footstep'),
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      isFootstepSelected = false;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        !isFootstepSelected ? Colors.red : Colors.grey.shade300,
-                    foregroundColor:
-                        !isFootstepSelected ? Colors.white : Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 15),
-                  ),
-                  child: const Text('Bengkel'),
-                ),
+                role == 'Driver'
+                    ? ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            isFootstepSelected = true;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: role == "Driver"
+                              ? Colors.red
+                              : Colors.grey.shade300,
+                          foregroundColor:
+                              role == "Driver" ? Colors.white : Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 15),
+                        ),
+                        child: const Text('Footstep'),
+                      )
+                    : ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            isFootstepSelected = false;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: role == "Mekanik"
+                              ? Colors.red
+                              : Colors.grey.shade300,
+                          foregroundColor:
+                              role == "Mekanik" ? Colors.white : Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 15),
+                        ),
+                        child: const Text('Bengkel'),
+                      ),
               ],
             ),
           ),
@@ -74,7 +77,7 @@ class _HistoryViewState extends State<HistoryView> {
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
               child:
-                  isFootstepSelected ? buildFootstepBody() : buildBengkelBody(),
+                  role == 'Driver' ? buildFootstepBody() : buildBengkelBody(),
             ),
           ),
         ],
@@ -176,7 +179,7 @@ class _HistoryViewState extends State<HistoryView> {
             itemBuilder: (context, index) {
               var order = historyController.historyBengkel[index];
               return buildOrderItem(
-                  order['order']['dropoff'],
+                  order['order']['pickup'],
                   order['order']['pembayaran'][0]['total'].toString(),
                   Icons.tire_repair,
                   Colors.blue);

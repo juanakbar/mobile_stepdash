@@ -89,6 +89,8 @@ class LoginController extends GetxController {
         // Pindah ke halaman HOME
         if (value.body['user']['roles'][0]['name'] == 'Driver') {
           Get.offAllNamed(Routes.DRIVER);
+        } else if (value.body['user']['roles'][0]['name'] == 'Mekanik') {
+          Get.offAllNamed(Routes.MEKANIK);
         } else {
           Get.offAllNamed(Routes.HOME);
         }

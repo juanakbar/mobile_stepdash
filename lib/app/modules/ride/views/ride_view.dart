@@ -567,7 +567,7 @@ class _RideViewState extends State<RideView> {
                                 'harga': harga.value
                               };
                               Get.offAllNamed(Routes.TRACKING, arguments: data);
-                              // Get.toNamed(Routes.PAYMENT, arguments: data);
+                              // Get.offAllNamed(Routes.PAYMENT, arguments: data);
                               EasyLoading.dismiss();
                               createOrder();
                             }

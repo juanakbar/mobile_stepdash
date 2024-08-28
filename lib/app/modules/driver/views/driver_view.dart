@@ -26,6 +26,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_swipe_button/flutter_swipe_button.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as serviceHttp;
+import 'package:url_launcher/url_launcher.dart';
 
 class DriverView extends StatefulWidget {
   const DriverView({super.key});
@@ -286,7 +287,7 @@ class _DriverViewState extends State<DriverView> {
 
       // Menunggu sebelum melakukan loop berikutnya
       await Future.delayed(
-          const Duration(seconds: 2)); // Menunggu 2 detik sebelum mengulang
+          const Duration(seconds: 1)); // Menunggu 2 detik sebelum mengulang
       // }
     }
 
@@ -395,47 +396,65 @@ class _DriverViewState extends State<DriverView> {
     }
   }
 
-  Future<void> routeDone(int requestId) async {
-    // Tampilkan indikator loading
+  void completedOrder() async {
     EasyLoading.show(status: 'Tunggu Sebentar...');
-
-    // Mendapatkan referensi ke node di Firebase Realtime Database
-    DatabaseReference orderRef =
-        FirebaseDatabase.instance.ref("requestOrders/$requestId");
-    DatabaseReference driverRef =
-        FirebaseDatabase.instance.ref("drivers/${driverDetail!['id']}");
-
+    DatabaseReference ref =
+        FirebaseDatabase.instance.ref("requestOrders/$ordersId");
     try {
-      var data = jsonEncode({
-        'order_id': orderIDAPI,
-        'total': getRequest[0]['harga'],
-      });
-      var response = await serviceHttp.post(
-        Uri.parse("http://10.0.2.2:8000/api/create_order"),
+      final response = await serviceHttp.post(
+        Uri.parse("http://10.0.2.2:8000/api/create_pembayaran"),
         headers: <String, String>{
           'Content-Type': 'application/json',
           "Authorization": 'Bearer ${SpUtil.getString('token')}',
         },
-        body: data,
+        body: jsonEncode(
+            {"order_id": orderIDAPI, "total": getRequest[0]['harga']}),
       );
-
       if (response.statusCode == 200) {
-        // var jsonResponse = json.decode(response.body);
-        // await orderRef.update({
-        //   'status': 'completed',
-        // });
-        // await driverRef.update({
-        //   'busy': false,
-        // });
-        EasyLoading.dismiss();
+        var data = jsonEncode({"id": orderIDAPI, "status": "completed"});
+        final responseUpdate = await serviceHttp.put(
+          Uri.parse("http://10.0.2.2:8000/api/update_status_order"),
+          headers: <String, String>{
+            'Content-Type': 'application/json',
+            "Authorization": 'Bearer ${SpUtil.getString('token')}',
+            'Accept': 'application/json',
+          },
+          body: data,
+        );
+        if (responseUpdate.statusCode == 200) {
+          await ref.update({
+            'status': 'completed',
+            'harga': getRequest[0]['harga'],
+          });
+          setState(() {
+            isModalShown = false;
+            requestIn = false;
+            ordersId = 0;
+            orderIDAPI = 0;
+            getRequest.value = [];
+            _markers.clear();
+            _startPolling();
+            isStatusAccepted.value = false;
+          });
+          // Sembunyikan indikator loading
+          EasyLoading.dismiss();
+          Get.snackbar('Success', 'Pekerjaan Selesai');
+        } else {
+          print(
+              'Failed to create order: ${responseUpdate.statusCode} + ${responseUpdate.body}');
+          EasyLoading.showError('Failed to Update order.');
+          EasyLoading.dismiss();
+        }
       } else {
+        print(
+            'Failed to create order: ${response.statusCode} + ${response.body}');
         EasyLoading.showError('Failed to create order.');
         EasyLoading.dismiss();
       }
+
+      print('Data updated successfully.');
     } catch (e) {
-      print('Failed to update request status: $e');
-      EasyLoading.showError('Failed to update request status.');
-      EasyLoading.dismiss();
+      print('Failed to update data: $e');
     }
   }
 
@@ -481,13 +500,16 @@ class _DriverViewState extends State<DriverView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 40,
                       backgroundColor: Colors.white,
                       child: CircleAvatar(
                         radius: 36,
                         backgroundImage: NetworkImage(
-                            'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'),
+                            controller.driverDetail.value['avatar']
+                            //     ??
+                            // 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
+                            ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -674,9 +696,10 @@ class _DriverViewState extends State<DriverView> {
                                         fontSize: 15,
                                         color: Colors.grey),
                                     TextCustom(
-                                        text: shortenAddress(
-                                                getRequest[0]['pickupLoc']) ??
-                                            '',
+                                        text: getRequest.isNotEmpty
+                                            ? shortenAddress(
+                                                getRequest[0]['pickupLoc'])
+                                            : '',
                                         fontSize: 16,
                                         maxLine: 2),
                                   ],
@@ -697,9 +720,10 @@ class _DriverViewState extends State<DriverView> {
                                         fontSize: 15,
                                         color: Colors.grey),
                                     TextCustom(
-                                        text: shortenAddress(getRequest[0]
-                                                ['destinationLoc']) ??
-                                            '',
+                                        text: getRequest.isNotEmpty
+                                            ? shortenAddress(
+                                                getRequest[0]['destinationLoc'])
+                                            : '',
                                         fontSize: 16,
                                         maxLine: 2),
                                   ],
@@ -717,15 +741,20 @@ class _DriverViewState extends State<DriverView> {
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
-                                    child: SvgPicture.network(
-                                      getRequest[0]['user']['avatar'],
-                                      fit: BoxFit
-                                          .cover, // To ensure the SVG scales properly
-                                    ),
+                                    child: getRequest.isNotEmpty
+                                        ? SvgPicture.network(
+                                            getRequest[0]['user']['avatar'],
+                                            fit: BoxFit
+                                                .cover, // To ensure the SVG scales properly
+                                          )
+                                        : CircularProgressIndicator(),
                                   ),
                                 ),
                                 const SizedBox(width: 10.0),
-                                TextCustom(text: getRequest[0]['user']['nama']),
+                                TextCustom(
+                                    text: getRequest.isNotEmpty
+                                        ? getRequest[0]['user']['nama']
+                                        : ''),
                                 const Spacer(),
                                 InkWell(
                                   // onTap: () async => await urlLauncherFrave
@@ -758,7 +787,7 @@ class _DriverViewState extends State<DriverView> {
                                     activeThumbColor: green1,
                                     activeTrackColor: Colors.grey.shade300,
                                     onSwipe: () async {
-                                      await routeDone(ordersId);
+                                      completedOrder();
                                     },
                                     child: const Text(
                                       "Selesaikan Perjalanan",
@@ -812,6 +841,14 @@ class _DriverViewState extends State<DriverView> {
         ],
       ),
     );
+  }
+
+  Future<void> makePhoneCall(String url) async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   void _showModal(
