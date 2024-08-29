@@ -38,19 +38,9 @@ class LoginController extends GetxController {
     EasyLoading.show(status: 'Tunggu Sebentar...');
     LoginProvider().logout(token).then((value) async {
       await SpUtil.clear();
-      Get.offAllNamed(Routes.LOGIN);
+      Get.offAllNamed(Routes.SPLASH);
       EasyLoading.dismiss();
       Get.snackbar('Success', 'Logout Success');
-      // if (value.isOk) {
-      //   await SpUtil.clear();
-      //   Get.offAllNamed(Routes.LOGIN);
-      //   EasyLoading.dismiss();
-      //   Get.snackbar('Success', 'Logout Success');
-      // } else {
-      //   EasyLoading.dismiss();
-      //   print(value.body);
-      //   Get.snackbar('Error', 'Logout Failed ');
-      // }
     });
   }
 

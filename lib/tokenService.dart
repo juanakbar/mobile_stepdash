@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
+import 'package:stepmotor/env.dart';
 import 'package:stepmotor/failure.dart';
 import 'package:http/http.dart' as http;
 import 'package:stepmotor/tokenModel.dart';
@@ -17,7 +18,7 @@ class TokenService {
 
     try {
       var response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/create_token'),
+        Uri.parse('$BASE_API_URL/create_token'),
         headers: <String, String>{
           'Content-Type': 'application/json',
           "Authorization": 'Bearer ${SpUtil.getString('token')}',

@@ -12,6 +12,7 @@ import 'package:stepmotor/app/modules/home/controllers/home_controller.dart';
 import 'package:stepmotor/app/modules/ride/controllers/ride_controller.dart';
 import 'package:stepmotor/app/modules/ride/directions_model.dart';
 import 'package:stepmotor/app/routes/app_pages.dart';
+import 'package:stepmotor/env.dart';
 import 'package:stepmotor/snap_web_view_screen.dart';
 import 'package:stepmotor/theme.dart';
 import 'package:stepmotor/tokenService.dart';
@@ -101,7 +102,7 @@ class _RideViewState extends State<RideView> {
   Future<void> getHarga() async {
     try {
       serviceHttp.get(
-        Uri.parse('http://localhost:8000/api/settings'),
+        Uri.parse('$BASE_API_URL/settings'),
         headers: {
           'Accept': 'application/json',
           "Authorization": 'Bearer ${SpUtil.getString('token')}',

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:stepmotor/app/modules/ride/directions_model.dart';
+import 'package:stepmotor/env.dart';
 import 'package:uuid/uuid.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sp_util/sp_util.dart';
@@ -16,7 +17,7 @@ class PlacesApiProvider extends GetConnect {
   Future<Response> getSettings() async {
     try {
       final response = await get(
-        'http://localhost:8000/api/settings',
+        '$BASE_API_URL/settings',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',

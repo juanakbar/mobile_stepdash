@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as serviceHttp;
 import 'package:sp_util/sp_util.dart';
+import 'package:stepmotor/env.dart';
 
 class HistoryController extends GetxController {
   //TODO: Implement HistoryController
@@ -40,7 +41,7 @@ class HistoryController extends GetxController {
     EasyLoading.show(status: 'Loading...');
     try {
       final response = await serviceHttp.get(
-          Uri.parse('http://10.0.2.2:8000/api/total_pendapatan_user'),
+          Uri.parse('$BASE_API_URL/total_pendapatan_user'),
           headers: <String, String>{
             'Content-Type': 'application/json',
             "Authorization": 'Bearer ${SpUtil.getString('token')}',
@@ -67,7 +68,7 @@ class HistoryController extends GetxController {
     EasyLoading.show(status: 'Loading...');
     try {
       final response = await serviceHttp.get(
-          Uri.parse('http://10.0.2.2:8000/api/history?layanan=$layananID'),
+          Uri.parse('$BASE_API_URL/history?layanan=$layananID'),
           headers: <String, String>{
             'Content-Type': 'application/json',
             "Authorization": 'Bearer ${SpUtil.getString('token')}',
@@ -103,7 +104,7 @@ class HistoryController extends GetxController {
     EasyLoading.show(status: 'Loading...');
     try {
       final response = await serviceHttp.get(
-          Uri.parse('http://10.0.2.2:8000/api/history?layanan=$layananID'),
+          Uri.parse('$BASE_API_URL/history?layanan=$layananID'),
           headers: <String, String>{
             'Content-Type': 'application/json',
             "Authorization": 'Bearer ${SpUtil.getString('token')}',

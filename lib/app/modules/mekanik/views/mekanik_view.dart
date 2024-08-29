@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:stepmotor/app/modules/History/views/history_view.dart';
 import 'package:stepmotor/app/modules/user/controllers/user_controller.dart';
 import 'package:stepmotor/app/modules/user/views/user_view.dart';
+import 'package:stepmotor/env.dart';
 import 'package:stepmotor/theme.dart';
 import 'package:sp_util/sp_util.dart';
 import '../controllers/mekanik_controller.dart';
@@ -134,7 +135,7 @@ class _MekanikViewState extends State<MekanikView> {
         FirebaseDatabase.instance.ref("serviceOrders/$requestId");
     try {
       var response = await serviceHttp.post(
-        Uri.parse("http://10.0.2.2:8000/api/create_order"),
+        Uri.parse("$BASE_API_URL/create_order"),
         headers: <String, String>{
           'Content-Type': 'application/json',
           "Authorization": 'Bearer ${SpUtil.getString('token')}',
@@ -193,7 +194,7 @@ class _MekanikViewState extends State<MekanikView> {
         FirebaseDatabase.instance.ref("serviceOrders/$ordersId");
     try {
       final response = await serviceHttp.post(
-        Uri.parse("http://10.0.2.2:8000/api/create_pembayaran"),
+        Uri.parse("$BASE_API_URL/create_pembayaran"),
         headers: <String, String>{
           'Content-Type': 'application/json',
           "Authorization": 'Bearer ${SpUtil.getString('token')}',
@@ -203,7 +204,7 @@ class _MekanikViewState extends State<MekanikView> {
       if (response.statusCode == 200) {
         var data = jsonEncode({"id": orderIDAPI, "status": "completed"});
         final responseUpdate = await serviceHttp.put(
-          Uri.parse("http://10.0.2.2:8000/api/update_status_order"),
+          Uri.parse("$BASE_API_URL/update_status_order"),
           headers: <String, String>{
             'Content-Type': 'application/json',
             "Authorization": 'Bearer ${SpUtil.getString('token')}',
